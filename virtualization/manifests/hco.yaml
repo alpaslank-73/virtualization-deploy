@@ -16,9 +16,6 @@ metadata:
 spec:
   ksmConfiguration:
     nodeLabelSelector: {}
-  storageImport:
-    insecureRegistries:
-     - registry.ocp4.example.com:8443
   virtualMachineOptions:
     disableFreePageReporting: false
     disableSerialConsoleLog: true
@@ -59,3 +56,35 @@ spec:
   uninstallStrategy: BlockUninstallIfWorkloadsExist
   resourceRequirements:
     vmiCPUAllocationRatio: 10
+  workloadSources:
+    dataImportCronTemplates:
+    - metadata:
+        annotations:
+          cdi.kubevirt.io/storage.bind.immediate.requested: "true"
+          cdi.kubevirt.io/storage.import.sourceDesiredDigest: sha256:a17483f5c7eed900fa405570ac0614a01cefb9e6cf8f57d2c4507ff890aa4966
+        labels:
+          instancetype.kubevirt.io/default-instancetype: u1.medium
+          instancetype.kubevirt.io/default-preference: rhel.9
+          kubevirt.io/dynamic-credentials-support: "true"
+        name: alp-rhel9-image-cron
+      spec:
+        garbageCollect: Outdated
+        importsToKeep: 1
+        managedDataSource: alp-rhel9
+        retentionPolicy: None
+        schedule: ""
+        template:
+          metadata: {}
+          spec:
+            source:
+              registry:
+                pullMethod: node
+                url: docker://quay.io/alpaslank/rhel9/rhel-guest-image
+            storage:
+              resources:
+                requests:
+                  storage: 10Gi
+              storageClassName: lvms-local-lvm-sdb
+              volumeMode: Block
+          status: {}
+    enableCommonBootImageImport: false
